@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew's URL Shortener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1b2c25 0%, #2d5a3d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .slug-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .domain-prefix {
+            padding: 16px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            color: #666;
+            font-size: 16px;
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .short-url-output {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            word-break: break-all;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .short-url-output.active {
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .copy-feedback {
+            background: #48bb78;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .copy-feedback.show {
+            display: block;
+        }
+
+        .instructions {
+            background: #edf2f7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 32px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Andrew's URL Shortener</h1>
+        <p class="subtitle">Create branded short links for andrewfllewellyn.com</p>
+
+        <form id="urlForm">
+            <div class="form-group">
+                <label for="baseUrl">Base URL</label>
+                <input
+                    type="url"
+                    id="baseUrl"
+                    placeholder="https://example.com/product-launch"
+                    required
+                >
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div class="form-group">
+                    <label for="utmSource">UTM Source</label>
+                    <input
+                        type="text"
+                        id="utmSource"
+                        placeholder="linkedin"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="utmMedium">UTM Medium</label>
+                    <input
+                        type="text"
+                        id="utmMedium"
+                        placeholder="post"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="utmCampaign">UTM Campaign</label>
+                    <input
+                        type="text"
+                        id="utmCampaign"
+                        placeholder="october-tips"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="utmContent">UTM Content</label>
+                    <input
+                        type="text"
+                        id="utmContent"
+                        placeholder="newsletter-v1"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Generated Full URL (with UTM)</label>
+                <div id="fullUrlOutput" class="short-url-output"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="customSlug">Custom Slug (optional)</label>
+                <div class="slug-input">
+                    <div class="domain-prefix">andrewfllewellyn.com/</div>
+                    <input
+                        type="text"
+                        id="customSlug"
+                        placeholder="product-launch"
+                        pattern="[a-zA-Z0-9-]+"
+                        title="Only letters, numbers, and hyphens allowed"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Generated Short URL</label>
+                <div id="shortUrlOutput" class="short-url-output"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-primary">Generate Short URL</button>
+                <button type="button" id="copyBtn" class="btn-secondary" style="display: none;">Copy URL</button>
+            </div>
+
+            <div id="copyFeedback" class="copy-feedback"></div>
+        </form>
+
+        <div class="instructions">
+            <h3>How to set up redirects in Squarespace:</h3>
+            <ol>
+                <li><strong>Generate your short URL above</strong> - Copy both the short URL and the full UTM URL</li>
+                <li><strong>Go to Squarespace Settings</strong>:
+                    <ul>
+                        <li>Log into your Squarespace dashboard</li>
+                        <li>Click <em>Settings</em> (gear icon)</li>
+                        <li>Select <em>Developer Tools</em> → <em>URL Mappings</em></li>
+                    </ul>
+                </li>
+                <li><strong>Add the redirect</strong>:
+                    <ul>
+                        <li>Click <em>New Mapping</em> or <em>Add New Mapping</em></li>
+                        <li><strong>Format</strong>: <code>/your-slug -> https://your-full-url 302</code></li>
+                        <li><strong>Example</strong>: <code>/october-tips -> https://linkedin.com/posts/andrewllewellyn?utm_source=newsletter&utm_medium=email&utm_campaign=october-tips 302</code></li>
+                        <li><strong>Why 302?</strong> Temporary redirects are better for short links because:</li>
+                        <li>• You might change the destination URL later</li>
+                        <li>• Search engines won't cache the redirect permanently</li>
+                        <li>• Gives you flexibility to update links</li>
+                        <li>Click <em>Save</em></li>
+                    </ul>
+                </li>
+                <li><strong>Test your link</strong>:
+                    <ul>
+                        <li>Wait 5-10 minutes for changes to propagate</li>
+                        <li>Visit <code>https://andrewfllewellyn.com/your-slug</code> in a new incognito window</li>
+                        <li>It should redirect to your full UTM URL</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div style="background: #e6f3ff; padding: 12px; border-radius: 6px; margin-top: 16px; font-size: 13px;">
+                <strong>💡 Pro Tips:</strong>
+                • Use 302 redirects for short links (not 301)<br>
+                • Test redirects in an incognito/private window<br>
+                • Squarespace changes take 5-10 minutes to go live<br>
+                • You can edit or delete redirects anytime in URL Mappings
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('urlForm');
+        const baseUrlInput = document.getElementById('baseUrl');
+        const utmSourceInput = document.getElementById('utmSource');
+        const utmMediumInput = document.getElementById('utmMedium');
+        const utmCampaignInput = document.getElementById('utmCampaign');
+        const utmContentInput = document.getElementById('utmContent');
+        const customSlugInput = document.getElementById('customSlug');
+        const fullUrlOutput = document.getElementById('fullUrlOutput');
+        const shortUrlOutput = document.getElementById('shortUrlOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyFeedback = document.getElementById('copyFeedback');
+
+        // Build full URL with UTM parameters
+        function buildFullUrl() {
+            const baseUrl = baseUrlInput.value.trim();
+            if (!baseUrl) return '';
+
+            const url = new URL(baseUrl);
+
+            if (utmSourceInput.value.trim()) {
+                url.searchParams.set('utm_source', utmSourceInput.value.trim());
+            }
+            if (utmMediumInput.value.trim()) {
+                url.searchParams.set('utm_medium', utmMediumInput.value.trim());
+            }
+            if (utmCampaignInput.value.trim()) {
+                url.searchParams.set('utm_campaign', utmCampaignInput.value.trim());
+            }
+            if (utmContentInput.value.trim()) {
+                url.searchParams.set('utm_content', utmContentInput.value.trim());
+            }
+
+            return url.toString();
+        }
+
+        // Generate slug from UTM campaign or base URL
+        function generateSlug() {
+            const utmCampaign = utmCampaignInput.value.trim();
+            if (utmCampaign) {
+                return utmCampaign.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+            }
+
+            // Fallback to base URL path
+            try {
+                const baseUrl = baseUrlInput.value.trim();
+                if (baseUrl) {
+                    const urlObj = new URL(baseUrl);
+                    const pathname = urlObj.pathname.replace('/', '').replace(/[^a-zA-Z0-9]/g, '-');
+                    return pathname || 'link';
+                }
+            } catch {
+                return 'link';
+            }
+
+            return 'link';
+        }
+
+        // Generate short URL
+        function generateShortUrl() {
+            const baseUrl = baseUrlInput.value.trim();
+            if (!baseUrl) return;
+
+            const customSlug = customSlugInput.value.trim();
+
+            let slug = customSlug;
+            if (!slug) {
+                slug = generateSlug();
+            }
+
+            // Ensure slug is clean
+            slug = slug.replace(/[^a-zA-Z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+            if (!slug) {
+                slug = 'link';
+            }
+
+            const shortUrl = `https://andrewfllewellyn.com/${slug}`;
+
+            // Update outputs
+            const fullUrl = buildFullUrl();
+            if (fullUrl) {
+                fullUrlOutput.textContent = fullUrl;
+                fullUrlOutput.classList.add('active');
+            }
+
+            shortUrlOutput.textContent = shortUrl;
+            shortUrlOutput.classList.add('active');
+            copyBtn.style.display = 'block';
+
+            return shortUrl;
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            const shortUrl = shortUrlOutput.textContent;
+
+            try {
+                await navigator.clipboard.writeText(shortUrl);
+                showCopyFeedback('✅ Short URL copied to clipboard!');
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = shortUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopyFeedback('✅ Short URL copied to clipboard!');
+            }
+        }
+
+        function showCopyFeedback(message) {
+            copyFeedback.textContent = message;
+            copyFeedback.classList.add('show');
+
+            setTimeout(() => {
+                copyFeedback.classList.remove('show');
+            }, 3000);
+        }
+
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            generateShortUrl();
+        });
+
+        // Copy button
+        copyBtn.addEventListener('click', copyToClipboard);
+
+        // Auto-generate on input change
+        baseUrlInput.addEventListener('input', generateShortUrl);
+        utmSourceInput.addEventListener('input', generateShortUrl);
+        utmMediumInput.addEventListener('input', generateShortUrl);
+        utmCampaignInput.addEventListener('input', generateShortUrl);
+        utmContentInput.addEventListener('input', generateShortUrl);
+        customSlugInput.addEventListener('input', generateShortUrl);
+    </script>
+</body>
+</html>
