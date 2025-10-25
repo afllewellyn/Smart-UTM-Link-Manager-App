@@ -42,8 +42,11 @@ No additional setup or dependencies required – it's a static HTML application.
    - Go to Settings > Developer Tools > URL Mappings
    - Add the redirect:
      - Click New Mapping or Add New Mapping
-     - Format: /your-slug -> /url-with-utms 302
-     - Example: /SlackLists -> /blog/project-management-slack-vs-clickup-asana?utm_source=linkedin&utm_medium=post&utm_campaign=SlackListsProjectManagement 302
+     - Format: `/your-slug -> /url-with-utms 302`
+     - Example:
+       ```
+       /SlackLists -> /blog/project-management-slack-vs-clickup-asana?utm_source=linkedin&utm_medium=post&utm_campaign=SlackListsProjectManagement 302
+       ```
    - Wait 5-10 minutes for changes to propagate
    - Test the link in an incognito window
 
