@@ -2,7 +2,7 @@
 
 A simple web-based tool for creating UTM-branded short links for andrewfllewellyn.com instead of using other tools like bit.ly.
 
-**Live app:** https://tangerine-cajeta-ec9200.netlify.app/
+**Live app:** https://andrewllewellynshorturls.netlify.app/
 
 ## Features
 
