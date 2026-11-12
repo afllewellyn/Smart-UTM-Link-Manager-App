@@ -1,6 +1,6 @@
 # Andrew's URL Shortener
 
-A simple web-based tool for creating UTM-branded short links for andrewfllewellyn.com. This tool helps marketers and content creators generate shortened URLs with UTM tracking parameters for better campaign analytics.
+A simple web-based tool for creating UTM-branded short links for andrewfllewellyn.com instead of using other tools like bit.ly.
 
 ## Features
 
