@@ -2,28 +2,15 @@
 
 A simple web-based tool for creating UTM-branded short links for andrewfllewellyn.com instead of using other tools like bit.ly.
 
+**Live app:** https://andrewllewellynshorturls.netlify.app/
+
 ## Features
 
 - **Custom Slug Generation**: Create personalized short URLs with custom slugs or auto-generated ones based on your UTM campaign.
 - **UTM Parameter Support**: Easily add UTM source, medium, campaign, and content parameters to your links.
 - **Copy to Clipboard**: Quickly copy generated URLs for easy sharing.
+- **Squarespace Redirect Line**: Copy the exact URL Mapping line, page path and UTMs included, ready to paste into Squarespace.
 - **Squarespace Integration**: Built-in instructions for setting up redirects in Squarespace to make your short links functional.
-
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/afllewellyn/Smart-UTM-Link-Manager-App.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
-   cd Smart-UTM-Link-Manager-App
-   ```
-
-3. Open `index.html` in your web browser to start using the tool.
-
-No additional setup or dependencies required – it's a static HTML application.
 
 ## Usage
 
@@ -35,24 +22,24 @@ No additional setup or dependencies required – it's a static HTML application.
 
 4. **Generate Links**: Click "Generate Short URL" to create both the full UTM URL and the shortened version.
 
-5. **Copy and Use**: Use the copy button to copy the short URL, then follow the provided instructions to set up the redirect in Squarespace.
+5. **Copy and Use**: Use **Copy URL** to copy the short URL to share, and **Copy Redirect** to copy the Squarespace mapping line.
 
 6. **Set Up Redirect in Squarespace**:
    - Log into your Squarespace dashboard
    - Go to Settings > Developer Tools > URL Mappings
    - Add the redirect:
      - Click New Mapping or Add New Mapping
+     - Paste the line from **Copy Redirect**
      - Format: `/your-slug -> /url-with-utms 302`
      - Example:
        ```
        /SlackLists -> /blog/project-management-slack-vs-clickup-asana?utm_source=linkedin&utm_medium=post&utm_campaign=SlackListsProjectManagement 302
        ```
-   - Wait 5-10 minutes for changes to propagate
-   - Test the link in an incognito window
+   - Changes go live right away. Test the link in an incognito window
 
 ## Screenshots
 
-*Add screenshots of the interface here to showcase the tool in action.*
+![Andrew's URL Shortener](docs/screenshot.png)
 
 ## License
 

@@ -265,9 +265,15 @@
                 <div id="shortUrlOutput" class="short-url-output"></div>
             </div>
 
+            <div class="form-group">
+                <label>Squarespace Redirect (paste into URL Mappings)</label>
+                <div id="redirectOutput" class="short-url-output"></div>
+            </div>
+
             <div class="button-group">
                 <button type="submit" class="btn-primary">Generate Short URL</button>
                 <button type="button" id="copyBtn" class="btn-secondary" style="display: none;">Copy URL</button>
+                <button type="button" id="copyRedirectBtn" class="btn-secondary" style="display: none;">Copy Redirect</button>
             </div>
 
             <div id="copyFeedback" class="copy-feedback"></div>
@@ -276,7 +282,7 @@
         <div class="instructions">
             <h3>How to set up redirects in Squarespace:</h3>
             <ol>
-                <li><strong>Generate your short URL above</strong> - Copy both the short URL and the full UTM URL</li>
+                <li><strong>Generate your short URL above</strong> - then click <em>Copy Redirect</em> to copy the ready-to-paste mapping line</li>
                 <li><strong>Go to Squarespace Settings</strong>:
                     <ul>
                         <li>Log into your Squarespace dashboard</li>
@@ -298,7 +304,6 @@
                 </li>
                 <li><strong>Test your link</strong>:
                     <ul>
-                        <li>Wait 5-10 minutes for changes to propagate</li>
                         <li>Visit <code>https://andrewfllewellyn.com/your-slug</code> in a new incognito window</li>
                         <li>It should redirect to your full UTM URL</li>
                     </ul>
@@ -309,7 +314,6 @@
                 <strong>💡 Pro Tips:</strong>
                 • Use 302 redirects for short links (not 301)<br>
                 • Test redirects in an incognito/private window<br>
-                • Squarespace changes take 5-10 minutes to go live<br>
                 • You can edit or delete redirects anytime in URL Mappings
             </div>
         </div>
@@ -325,7 +329,9 @@
         const customSlugInput = document.getElementById('customSlug');
         const fullUrlOutput = document.getElementById('fullUrlOutput');
         const shortUrlOutput = document.getElementById('shortUrlOutput');
+        const redirectOutput = document.getElementById('redirectOutput');
         const copyBtn = document.getElementById('copyBtn');
+        const copyRedirectBtn = document.getElementById('copyRedirectBtn');
         const copyFeedback = document.getElementById('copyFeedback');
 
         // Build full URL with UTM parameters
@@ -333,7 +339,12 @@
             const baseUrl = baseUrlInput.value.trim();
             if (!baseUrl) return '';
 
-            const url = new URL(baseUrl);
+            let url;
+            try {
+                url = new URL(baseUrl);
+            } catch {
+                return '';
+            }
 
             if (utmSourceInput.value.trim()) {
                 url.searchParams.set('utm_source', utmSourceInput.value.trim());
@@ -363,7 +374,7 @@
                 const baseUrl = baseUrlInput.value.trim();
                 if (baseUrl) {
                     const urlObj = new URL(baseUrl);
-                    const pathname = urlObj.pathname.replace('/', '').replace(/[^a-zA-Z0-9]/g, '-');
+                    const pathname = urlObj.pathname.replace(/^\/+|\/+$/g, '').replace(/[^a-zA-Z0-9]/g, '-');
                     return pathname || 'link';
                 }
             } catch {
@@ -373,10 +384,36 @@
             return 'link';
         }
 
+        // Build the Squarespace URL Mapping line: /slug -> /page-path?utms 302
+        function buildRedirectLine(slug, fullUrl) {
+            const url = new URL(fullUrl);
+            const host = url.hostname.replace(/^www\./, '');
+            const target = host === 'andrewfllewellyn.com'
+                ? url.pathname + url.search
+                : url.origin + url.pathname + url.search;
+            return `/${slug} -> ${target} 302`;
+        }
+
+        function setOutput(el, text) {
+            el.textContent = text;
+            el.classList.toggle('active', Boolean(text));
+        }
+
+        function clearOutputs() {
+            setOutput(fullUrlOutput, '');
+            setOutput(shortUrlOutput, '');
+            setOutput(redirectOutput, '');
+            copyBtn.style.display = 'none';
+            copyRedirectBtn.style.display = 'none';
+        }
+
         // Generate short URL
         function generateShortUrl() {
-            const baseUrl = baseUrlInput.value.trim();
-            if (!baseUrl) return;
+            const fullUrl = buildFullUrl();
+            if (!fullUrl) {
+                clearOutputs();
+                return;
+            }
 
             const customSlug = customSlugInput.value.trim();
 
@@ -395,36 +432,29 @@
             const shortUrl = `https://andrewfllewellyn.com/${slug}`;
 
             // Update outputs
-            const fullUrl = buildFullUrl();
-            if (fullUrl) {
-                fullUrlOutput.textContent = fullUrl;
-                fullUrlOutput.classList.add('active');
-            }
-
-            shortUrlOutput.textContent = shortUrl;
-            shortUrlOutput.classList.add('active');
+            setOutput(fullUrlOutput, fullUrl);
+            setOutput(shortUrlOutput, shortUrl);
+            setOutput(redirectOutput, buildRedirectLine(slug, fullUrl));
             copyBtn.style.display = 'block';
+            copyRedirectBtn.style.display = 'block';
 
             return shortUrl;
         }
 
         // Copy to clipboard
-        async function copyToClipboard() {
-            const shortUrl = shortUrlOutput.textContent;
-
+        async function copyText(text, message) {
             try {
-                await navigator.clipboard.writeText(shortUrl);
-                showCopyFeedback('✅ Short URL copied to clipboard!');
+                await navigator.clipboard.writeText(text);
             } catch (err) {
                 // Fallback for older browsers
                 const textArea = document.createElement('textarea');
-                textArea.value = shortUrl;
+                textArea.value = text;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                showCopyFeedback('✅ Short URL copied to clipboard!');
             }
+            showCopyFeedback(message);
         }
 
         function showCopyFeedback(message) {
@@ -443,7 +473,10 @@
         });
 
         // Copy button
-        copyBtn.addEventListener('click', copyToClipboard);
+        copyBtn.addEventListener('click', () =>
+            copyText(shortUrlOutput.textContent, '✅ Short URL copied to clipboard!'));
+        copyRedirectBtn.addEventListener('click', () =>
+            copyText(redirectOutput.textContent, '✅ Redirect line copied to clipboard!'));
 
         // Auto-generate on input change
         baseUrlInput.addEventListener('input', generateShortUrl);
